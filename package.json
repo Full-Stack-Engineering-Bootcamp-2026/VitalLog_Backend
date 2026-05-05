@@ -1,0 +1,58 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:create": "typeorm-ts-node-commonjs migration:create src/db/migrations",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/db/data-source.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/db/data-source.ts",
+    "migration:show": "typeorm-ts-node-commonjs migration:show -d src/db/data-source.ts",
+    "seed:data": "mysql -h localhost -u admin -p vitallog_db < src/seed.sql",
+    "lint": "eslint src --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Full-Stack-Engineering-Bootcamp-2026/VitalLog_Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Full-Stack-Engineering-Bootcamp-2026/VitalLog_Backend/issues"
+  },
+  "homepage": "https://github.com/Full-Stack-Engineering-Bootcamp-2026/VitalLog_Backend#readme",
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
+    "argon2": "^0.44.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "joi": "^18.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.3",
+    "reflect-metadata": "^0.2.2",
+    "typedi": "^0.10.0",
+    "typeorm": "^0.3.28",
+    "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/argon2": "^0.15.4",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.6.0",
+    "@types/uuid": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "eslint": "^10.3.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typeorm-ts-node-commonjs": "^0.3.20",
+    "typescript": "^6.0.3"
+  }
+}

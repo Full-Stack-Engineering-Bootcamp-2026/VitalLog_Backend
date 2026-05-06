@@ -13,12 +13,6 @@ export class Streak {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @OneToOne(() => User, (user) => user.streak, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn()
-  user!: User;
-
   @Column({ default: 0 })
   currentStreak!: number;
 
@@ -30,4 +24,10 @@ export class Streak {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @OneToOne(() => User, (user) => user.streak, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn()
+  user!: User;
 }

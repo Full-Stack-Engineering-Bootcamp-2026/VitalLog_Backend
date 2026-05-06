@@ -12,11 +12,6 @@ export class FitnessLog {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, (user) => user.fitnessLogs, {
-    onDelete: "CASCADE",
-  })
-  user!: User;
-
   @Column({ type: "varchar", length: 100 })
   activityType!: string;
 
@@ -34,4 +29,9 @@ export class FitnessLog {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @ManyToOne(() => User, (user) => user.fitnessLogs, {
+    onDelete: "CASCADE",
+  })
+  user!: User;
 }

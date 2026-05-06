@@ -21,12 +21,6 @@ export class Flag {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, (user) => user.flags)
-  user!: User;
-
-  @ManyToOne(() => User, { nullable: true })
-  staff?: User;
-
   @Column({
     type: "enum",
     enum: Object.values(FLAG_SOURCE),
@@ -57,12 +51,18 @@ export class Flag {
   @Column({ type: "text", nullable: true })
   resolutionNote?: string;
 
-  @ManyToOne(() => User, { nullable: true })
-  resolvedBy?: User;
-
   @Column({ type: "timestamp", nullable: true })
   resolvedAt?: Date;
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @ManyToOne(() => User, (user) => user.flags)
+  user!: User;
+
+  @ManyToOne(() => User, { nullable: true })
+  staff?: User;
+
+  @ManyToOne(() => User, { nullable: true })
+  resolvedBy?: User;
 }

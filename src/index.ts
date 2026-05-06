@@ -96,6 +96,6 @@ class Application {
 
 const application = new Application();
 
-application.start();
+application.start(); //db connected ,server start listening on port
 
 export default application.app;

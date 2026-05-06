@@ -1,4 +1,16 @@
 import { RoleType } from "../../../common/constants/roles.constants";
+
+export interface UserResponseDto {
+  id: number;
+  name: string;
+  email: string;
+  role: RoleType;
+  isActive: boolean;
+  mustChangePassword: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface RegisterRequestDto {
   name: string;
   email: string;
@@ -6,9 +18,25 @@ export interface RegisterRequestDto {
   confirmPassword: string;
 }
 
+export interface RegisterResponseDto {
+  user: UserResponseDto;
+}
+
 export interface LoginRequestDto {
   email: string;
   password: string;
+}
+
+export interface AuthResponseDto {
+  accessToken: string;
+  //  mustChangePassword: boolean;
+  user: UserResponseDto;
+}
+
+export interface JwtPayloadDto {
+  id: number;
+  email: string;
+  role: RoleType;
 }
 
 export interface ForgotPasswordRequestDto {
@@ -16,7 +44,7 @@ export interface ForgotPasswordRequestDto {
 }
 
 export interface ResetPasswordRequestDto {
-  token: string;
+  resetToken: string;
   password: string;
   confirmPassword: string;
 }
@@ -30,27 +58,4 @@ export interface ChangePasswordRequestDto {
   currentPassword: string;
   newPassword: string;
   confirmNewPassword: string;
-}
-
-export interface UserResponseDto {
-  id: number;
-  name: string;
-  email: string;
-  role: RoleType;
-  isActive: boolean;
-  mustChangePassword: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface AuthResponseDto {
-  token: string;
-  mustChangePassword: boolean;
-  user: UserResponseDto;
-}
-
-export interface JwtPayloadDto {
-  id: number;
-  email: string;
-  role: RoleType;
 }

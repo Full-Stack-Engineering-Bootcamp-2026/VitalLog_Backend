@@ -6,11 +6,11 @@ import {
   CreateDateColumn,
   Unique,
 } from "typeorm";
-import { User } from "../user/entity/user.entity";
+import { User } from "../../user/entity/user.entity";
 import {
   VitalStatusType,
   VITAL_STATUS,
-} from "../../common/constants/vital.constant";
+} from "../../../common/constants/vital.constant";
 
 @Entity("vitals")
 //1 user 1 vital per day

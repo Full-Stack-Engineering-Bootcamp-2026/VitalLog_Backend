@@ -9,7 +9,7 @@ import {
 } from "typeorm";
 import { ROLES, RoleType } from "../../../common/constants/roles.constants";
 import { Profile } from "../../profile/entity/profile.entity";
-import { Vital } from "../../vital/vital.entity";
+import { Vital } from "../../vital/entity/vital.entity";
 import { FitnessLog } from "../../fitness/entity/fitness.entity";
 import { Flag } from "../../flag/entity/flag.entity";
 import { Streak } from "../../streak/entity/streak.entity";
@@ -25,7 +25,7 @@ export class User {
   @Column({ type: "varchar", length: 150, unique: true })
   email!: string;
 
-  @Column({ type: "varchar", length: 255, select: false })
+  @Column({ type: "varchar", length: 255 })
   password!: string;
 
   @Column({

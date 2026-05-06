@@ -15,12 +15,6 @@ export class Profile {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @OneToOne(() => User, (user) => user.profile, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn()
-  user!: User;
-
   @Column({ nullable: true })
   age?: number;
 
@@ -51,4 +45,10 @@ export class Profile {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @OneToOne(() => User, (user) => user.profile, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn()
+  user!: User;
 }

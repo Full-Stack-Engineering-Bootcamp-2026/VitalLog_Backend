@@ -19,11 +19,6 @@ export class Vital {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => User, (user) => user.vitals, {
-    onDelete: "CASCADE",
-  })
-  user!: User;
-
   @Column({ type: "date" })
   date!: string;
 
@@ -54,4 +49,9 @@ export class Vital {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @ManyToOne(() => User, (user) => user.vitals, {
+    onDelete: "CASCADE",
+  })
+  user!: User;
 }

@@ -1,3 +1,4 @@
+//const used as enum in entity
 export const VITAL_STATUS = {
   NORMAL: "NORMAL",
   WARNING: "WARNING",

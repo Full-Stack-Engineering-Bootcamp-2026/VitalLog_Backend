@@ -5,7 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from "typeorm";
-import { User } from "../user/user.entity";
+import { User } from "../../user/entity/user.entity";
 import {
   FLAG_SOURCE,
   FlagSourceType,
@@ -13,7 +13,7 @@ import {
   FlagSeverityType,
   FLAG_STATUS,
   FlagStatusType,
-} from "../../common/constants/flag.constant";
+} from "../../../common/constants/flag.constant";
 
 @Entity("flags")
 export class Flag {

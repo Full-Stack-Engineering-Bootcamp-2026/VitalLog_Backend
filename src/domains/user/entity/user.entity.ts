@@ -7,12 +7,12 @@ import {
   OneToOne,
   OneToMany,
 } from "typeorm";
-import { ROLES, RoleType } from "../../common/constants/roles.constants";
-import { Profile } from "../profile/profile.entity";
-import { Vital } from "../vital/vital.entity";
-import { FitnessLog } from "../fitness/fitness.entity";
-import { Flag } from "../flag/flag.entity";
-import { Streak } from "../streak/streak.entity";
+import { ROLES, RoleType } from "../../../common/constants/roles.constants";
+import { Profile } from "../../profile/entity/profile.entity";
+import { Vital } from "../../vital/vital.entity";
+import { FitnessLog } from "../../fitness/entity/fitness.entity";
+import { Flag } from "../../flag/entity/flag.entity";
+import { Streak } from "../../streak/entity/streak.entity";
 
 @Entity("users")
 export class User {

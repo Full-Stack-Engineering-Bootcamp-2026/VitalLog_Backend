@@ -5,7 +5,10 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from "typeorm";
+
 import { User } from "../../user/entity/user.entity";
+import { Vital } from "../../vital/entity/vital.entity";
+
 import {
   FLAG_SOURCE,
   FlagSourceType,
@@ -56,12 +59,19 @@ export class Flag {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @ManyToOne(() => User, (user) => user.flags)
+  @ManyToOne(() => User, (user) => user.flags, {
+    onDelete: "CASCADE",
+  })
   user!: User;
 
-  @ManyToOne(() => User, { nullable: true })
-  staff?: User;
-
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, {
+    nullable: true,
+  })
   resolvedBy?: User;
+
+  @ManyToOne(() => Vital, (vital) => vital.flags, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  sourceVital?: Vital;
 }

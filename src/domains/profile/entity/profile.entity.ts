@@ -7,8 +7,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { User } from "../user/user.entity";
-import { GenderType, GENDER } from "../../common/constants/gender.constants";
+import { User } from "../../user/user.entity";
+import { GenderType, GENDER } from "../../../common/constants/gender.constants";
 
 @Entity("profiles")
 export class Profile {

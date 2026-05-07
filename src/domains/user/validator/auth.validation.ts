@@ -58,7 +58,7 @@ export const forgotPasswordSchema = Joi.object({
 });
 
 export const resetPasswordSchema = Joi.object({
-  token: Joi.string().required().messages({
+  resetToken: Joi.string().required().messages({
     "string.empty": "Token is required",
   }),
 

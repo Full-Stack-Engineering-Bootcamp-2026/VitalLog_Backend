@@ -54,4 +54,45 @@ export class EmailService {
 `,
     });
   }
+
+  //forgot password email
+  public async sendForgotPasswordEmail(data: {
+    to: string;
+    name: string;
+    resetLink: string;
+  }): Promise<void> {
+    await sgMail.send({
+      to: data.to,
+
+      from: process.env.SENDGRID_FROM_EMAIL as string,
+
+      subject: "Reset Your Password",
+
+      html: `
+      <h2>Hello ${data.name}</h2>
+
+      <p>
+        Click the button below to reset your password.
+      </p>
+
+      <a
+        href="${data.resetLink}"
+        style="
+          display:inline-block;
+          padding:12px 20px;
+          background:#2563eb;
+          color:white;
+          text-decoration:none;
+          border-radius:8px;
+        "
+      >
+        Reset Password
+      </a>
+
+      <p>
+        This link will expire soon.
+      </p>
+    `,
+    });
+  }
 }

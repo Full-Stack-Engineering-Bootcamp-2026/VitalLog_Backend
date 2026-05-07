@@ -41,11 +41,11 @@ export class User {
   @Column({ default: false })
   mustChangePassword!: boolean;
 
-  @Column({ nullable: true })
-  resetToken?: string;
+  @Column({ type: "varchar", length: 255, nullable: true })
+  resetToken?: string | null;
 
   @Column({ type: "datetime", nullable: true })
-  resetTokenExpiry?: Date;
+  resetTokenExpiry?: Date | null;
 
   @CreateDateColumn()
   createdAt!: Date;

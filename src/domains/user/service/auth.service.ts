@@ -21,10 +21,17 @@ import { AuthErrorMessages } from "../../../common/constants/auth-error-messages
 import { NotFoundException } from "../../../common/exceptions/not-found.exception";
 import { ChangePasswordRequestDto } from "../dto/auth.dto";
 import { ForceResetPasswordRequestDto } from "../dto/auth.dto";
+import { EmailService } from "../../../common/services/email.service";
+import { ForgotPasswordRequestDto } from "../dto/auth.dto";
+import { ResetPasswordRequestDto } from "../dto/auth.dto";
+import crypto from "crypto";
 
 @Service()
 export class AuthService {
-  constructor(private readonly repository: UserRepository) {}
+  constructor(
+    private readonly repository: UserRepository,
+    private readonly emailService: EmailService,
+  ) {}
 
   public async register(
     data: RegisterRequestDto,
@@ -187,5 +194,60 @@ export class AuthService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+  //forgot password
+  public async forgotPassword(data: ForgotPasswordRequestDto): Promise<void> {
+    const user = await this.repository.findByEmail(data.email);
+
+    if (!user) {
+      throw new NotFoundException("user does not exist");
+    }
+    //generated random string as reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    //expiry 10 min
+    const resetTokenExpiry = new Date(Date.now() + 1000 * 60 * 10); //10 min current timestamp in ms and then store in date obj
+
+    await this.repository.update(user.id, {
+      resetToken,
+      resetTokenExpiry,
+    });
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    await this.emailService.sendForgotPasswordEmail({
+      to: user.email,
+      name: user.name,
+      resetLink,
+    });
+  }
+  //token generate ,email sent ,reset link is there
+
+  //reset password
+  public async resetPassword(data: ResetPasswordRequestDto): Promise<void> {
+    const user = await this.repository.findByResetToken(data.resetToken);
+
+    if (!user) {
+      throw new BadRequestException("Invalid reset token");
+    }
+
+    if (!user.resetTokenExpiry) {
+      throw new BadRequestException("Reset token is missing");
+    }
+
+    if (user.resetTokenExpiry < new Date()) {
+      throw new BadRequestException("Reset token is expired");
+    }
+
+    const hashedPassword = await argon2.hash(data.password, {
+      type: argon2.argon2id,
+    });
+
+    await this.repository.update(user.id, {
+      password: hashedPassword,
+      //clear token
+      resetToken: null,
+
+      resetTokenExpiry: null,
+    });
   }
 }

@@ -9,6 +9,8 @@ import { HttpStatus } from "../../../common/constants/http-status.constants";
 import { generateResponse } from "../../../common/utils/response.util";
 import { ChangePasswordRequestDto } from "../dto/auth.dto";
 import { ForceResetPasswordRequestDto } from "../dto/auth.dto";
+import { ForgotPasswordRequestDto } from "../dto/auth.dto";
+import { ResetPasswordRequestDto } from "../dto/auth.dto";
 @Service()
 export class AuthController {
   constructor(private readonly service: AuthService) {}
@@ -66,6 +68,24 @@ export class AuthController {
     return generateResponse(res, {
       statusCode: HttpStatus.OK,
       data,
+    });
+  }
+
+  public async forgotPassword(req: Request, res: Response): Promise<Response> {
+    await this.service.forgotPassword(req.body as ForgotPasswordRequestDto);
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "A reset link is sent on email",
+    });
+  }
+
+  public async resetPassword(req: Request, res: Response): Promise<Response> {
+    await this.service.resetPassword(req.body as ResetPasswordRequestDto);
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "Password reset successfully",
     });
   }
 }

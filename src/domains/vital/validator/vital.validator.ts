@@ -48,6 +48,35 @@ export const createVitalSchema = Joi.object({
     return val;
   });
 
+export const updateVitalSchema = Joi.object({
+  value: Joi.number().min(0).optional(),
+  systolicValue: Joi.number().min(0).optional(),
+  diastolicValue: Joi.number().min(0).optional(),
+}).custom((val, helpers) => {
+  const hasValue = val.value !== undefined;
+  const hasBP =
+    val.systolicValue !== undefined || val.diastolicValue !== undefined;
+
+  // must provide at least one field
+  if (!hasValue && !hasBP) {
+    return helpers.error("any.invalid", {
+      message: "Provide at least one field to update.",
+    });
+  }
+
+  // if providing BP fields, both must be present
+  if (
+    (val.systolicValue !== undefined && val.diastolicValue === undefined) ||
+    (val.diastolicValue !== undefined && val.systolicValue === undefined)
+  ) {
+    return helpers.error("any.invalid", {
+      message: "Both systolicValue and diastolicValue are required together.",
+    });
+  }
+
+  return val;
+});
+
 //validates query params,mhanje asa:->  /vitals?from=2026-01-01&to=2026-01-31&page=1
 export const queryVitalSchema = Joi.object({
   vitalType: Joi.string()

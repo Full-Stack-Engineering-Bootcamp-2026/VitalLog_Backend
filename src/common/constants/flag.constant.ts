@@ -1,3 +1,4 @@
+// Matches migration ENUM exactly
 export const FLAG_SOURCE = {
   SYSTEM: "SYSTEM",
   MANUAL: "MANUAL",

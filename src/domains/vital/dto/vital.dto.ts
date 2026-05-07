@@ -1,33 +1,47 @@
-//input dto -> fields required to log vital
+import { VitalTypeValue, RangeStatusType } from "../../../common/constants/vital.constant";
 
-export interface CreateVitalDto {
-  vitaltype: string;
+// Request DTOs 
+export interface CreateVitalRequestDto {
+  vitalType: VitalTypeValue;
   value?: number;
   systolicValue?: number;
   diastolicValue?: number;
-  loggedDate: string; // "YYYY-MM-DD"
+  loggedDate: string;
 }
 
-//query DTO -> filters for getting vitals list
-export interface QueryVitalDto {
-  vitalType?: string;
-  from?: string; // "YYYY-MM-DD"
-  to?: string; // "YYYY-MM-DD"
-  page?: string; // default "1"
-  limit?: string; // default "10"
+export interface UpdateVitalRequestDto {
+  value?: number;
+  systolicValue?: number;
+  diastolicValue?: number;
 }
 
-//output DTO -> shape returned to client
+export interface VitalQueryDto {
+  vitalType?: VitalTypeValue;
+  from?: string;
+  to?: string;
+  page?: string;
+  limit?: string;
+}
 
-export interface VitalOutDto {
+// Response DTOs 
+//VitalOutDto
+export interface VitalResponseDto {
   id: number;
-  vitalType: string;
+  vitalType: VitalTypeValue;
   value?: number;
   systolicValue?: number;
   diastolicValue?: number;
   unit?: string;
-  status: string;
+  status: RangeStatusType;
   loggedDate: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface PaginatedVitalsResponseDto {
+  data: VitalResponseDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

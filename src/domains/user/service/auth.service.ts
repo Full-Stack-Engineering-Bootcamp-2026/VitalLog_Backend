@@ -20,6 +20,8 @@ import { UnauthorizedException } from "../../../common/exceptions/unauthorized.e
 import { AuthErrorMessages } from "../../../common/constants/auth-error-messages.constants";
 import { NotFoundException } from "../../../common/exceptions/not-found.exception";
 import { ChangePasswordRequestDto } from "../dto/auth.dto";
+import { ForceResetPasswordRequestDto } from "../dto/auth.dto";
+
 @Service()
 export class AuthService {
   constructor(private readonly repository: UserRepository) {}
@@ -139,6 +141,32 @@ export class AuthService {
 
     await this.repository.update(user.id, {
       password: hashedPassword,
+    });
+  }
+
+  //force reset
+
+  public async forceResetPassword(
+    userId: number,
+    data: ForceResetPasswordRequestDto,
+  ): Promise<void> {
+    const user = await this.repository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    if (!user.mustChangePassword) {
+      throw new BadRequestException("Password reset is not required");
+    }
+
+    const hashedPassword = await argon2.hash(data.password, {
+      type: argon2.argon2id,
+    });
+
+    await this.repository.update(user.id, {
+      password: hashedPassword,
+      mustChangePassword: false,
     });
   }
 }

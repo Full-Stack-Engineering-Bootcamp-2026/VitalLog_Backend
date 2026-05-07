@@ -4,10 +4,9 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
 } from "typeorm";
 
-import { User } from "../../user/user.entity";
+import { User } from "../../user/entity/user.entity";
 import { Vital } from "../../vital/entity/vital.entity";
 
 import {
@@ -24,7 +23,6 @@ export class Flag {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  //what/ who triggered it
   @Column({
     type: "enum",
     enum: Object.values(FLAG_SOURCE),
@@ -32,7 +30,6 @@ export class Flag {
   })
   source!: FlagSourceType;
 
-  //flag reason
   @Column({ type: "text" })
   reason!: string;
 
@@ -53,27 +50,8 @@ export class Flag {
   })
   status!: FlagStatusType;
 
-  @ManyToOne(() => Vital, (vital) => vital.flags, {
-    nullable: true,
-    onDelete: "SET NULL",
-  })
-  sourceVital?: Vital;
-
   @Column({ type: "text", nullable: true })
   resolutionNote?: string;
-
-  @ManyToOne(() => User, { nullable: true, onDelete: "SET NULL" })
-  raisedBy?: User;
-
-  @ManyToOne(() => User, { nullable: true })
-  resolvedBy?: User;
-
-  //who is flagged ? that will show
-  @ManyToOne(() => User, (user) => user.flags, { onDelete: "CASCADE" })
-  user!: User;
-
-  @ManyToOne(() => User, { nullable: true })
-  staff?: User;
 
   @Column({ type: "timestamp", nullable: true })
   resolvedAt?: Date;
@@ -81,6 +59,19 @@ export class Flag {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  @ManyToOne(() => User, (user) => user.flags, {
+    onDelete: "CASCADE",
+  })
+  user!: User;
+
+  @ManyToOne(() => User, {
+    nullable: true,
+  })
+  resolvedBy?: User;
+
+  @ManyToOne(() => Vital, (vital) => vital.flags, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  sourceVital?: Vital;
 }

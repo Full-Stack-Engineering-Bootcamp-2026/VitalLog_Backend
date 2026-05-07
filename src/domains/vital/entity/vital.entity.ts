@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from "typeorm";
 
-import { User } from "../../user/user.entity";
+import { User } from "../../user/entity/user.entity";
 import { Flag } from "../../flag/entity/flag.entity";
 import {
   VITAL_TYPE,

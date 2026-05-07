@@ -19,7 +19,7 @@ import { UnauthorizedException } from "../../../common/exceptions/unauthorized.e
 
 import { AuthErrorMessages } from "../../../common/constants/auth-error-messages.constants";
 import { NotFoundException } from "../../../common/exceptions/not-found.exception";
-
+import { ChangePasswordRequestDto } from "../dto/auth.dto";
 @Service()
 export class AuthService {
   constructor(private readonly repository: UserRepository) {}
@@ -61,7 +61,7 @@ export class AuthService {
       user: responseUser,
     };
   }
-
+  //auth response dto sends access token and user response
   public async login(data: LoginRequestDto): Promise<AuthResponseDto> {
     const user = await this.repository.findByEmail(data.email);
 
@@ -111,5 +111,34 @@ export class AuthService {
       accessToken,
       user: responseUser,
     };
+  }
+
+  //change password
+  public async changePassword(
+    userId: number,
+    data: ChangePasswordRequestDto,
+  ): Promise<void> {
+    const user = await this.repository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    const isPasswordValid = await argon2.verify(
+      user.password,
+      data.currentPassword,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(AuthErrorMessages.INVALID_CREDENTIALS);
+    }
+
+    const hashedPassword = await argon2.hash(data.newPassword, {
+      type: argon2.argon2id,
+    });
+
+    await this.repository.update(user.id, {
+      password: hashedPassword,
+    });
   }
 }

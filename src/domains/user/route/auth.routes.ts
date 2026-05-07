@@ -6,6 +6,7 @@ import { registerSchema } from "../validator/auth.validation";
 import { loginSchema } from "../validator/auth.validation";
 import { validate } from "../../../common/middleware/validate.middleware";
 import { authenticate } from "../../../common/middleware/authenticate.middleware";
+import { changePasswordSchema } from "../validator/auth.validation";
 @Service()
 export class AuthRoutes {
   public router: Router;
@@ -32,6 +33,13 @@ export class AuthRoutes {
       "/login",
       validate(loginSchema),
       asyncHandler(this.controller.login.bind(this.controller)),
+    );
+
+    this.router.patch(
+      "/change-password",
+      authenticate,
+      validate(changePasswordSchema),
+      asyncHandler(this.controller.changePassword.bind(this.controller)),
     );
   }
 }

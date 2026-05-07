@@ -37,6 +37,7 @@ export class AuthRoutes {
     );
 
     this.router.patch(
+      //login needed
       "/change-password",
       authenticate,
       validate(changePasswordSchema),

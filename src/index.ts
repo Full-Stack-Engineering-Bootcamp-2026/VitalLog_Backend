@@ -15,7 +15,7 @@ import {
 } from "./common/middleware/error-handler.middleware";
 
 import { AuthRoutes } from "./domains/user/route/auth.routes";
-
+import { AdminRoutes } from "./domains/user/route/admin.routes";
 class Application {
   public app: Express;
   private port: number;
@@ -61,9 +61,10 @@ class Application {
     });
 
     const authRoutes = Container.get(AuthRoutes);
+    const adminRoutes = Container.get(AdminRoutes);
 
     v1Router.use("/auth", authRoutes.getRoutes());
-
+    v1Router.use("/admin", adminRoutes.getRoutes());
     this.app.use("/api/v1", v1Router);
 
     console.log("Routes initialized");

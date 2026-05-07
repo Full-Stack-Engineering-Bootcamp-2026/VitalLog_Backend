@@ -155,7 +155,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException("User not found");
     }
-
+    //only if mustChangePass is true
     if (!user.mustChangePassword) {
       throw new BadRequestException("Password reset is not required");
     }
@@ -168,5 +168,24 @@ export class AuthService {
       password: hashedPassword,
       mustChangePassword: false,
     });
+  }
+
+  public async me(userId: number): Promise<UserResponseDto> {
+    const user = await this.repository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      mustChangePassword: user.mustChangePassword,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 }

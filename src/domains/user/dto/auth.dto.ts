@@ -50,6 +50,7 @@ export interface ResetPasswordRequestDto {
 }
 
 export interface ForceResetPasswordRequestDto {
+  //staff/admin will send new pass
   password: string;
   confirmPassword: string;
 }

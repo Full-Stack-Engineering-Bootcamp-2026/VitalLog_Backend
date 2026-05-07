@@ -3,8 +3,6 @@ import { RoleType } from "../../../common/constants/roles.constants";
 export interface CreateStaffRequestDto {
   name: string;
   email: string;
-  password: string;
-  confirmPassword: string;
 }
 
 export interface MemberResponseDto {

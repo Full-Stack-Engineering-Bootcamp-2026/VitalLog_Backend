@@ -85,4 +85,17 @@ export class VitalController {
       data,
     });
   }
+
+  // DELETE /api/vitals/:id
+  public async deleteVital(req: Request, res: Response): Promise<Response> {
+    await this.vitalService.deleteVital(
+      req.user!.id,
+      parseInt(req.params.id as string, 10),
+    );
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "Vital deleted successfully.",
+    });
+  }
 }

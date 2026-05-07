@@ -50,5 +50,13 @@ export class VitalRoutes {
       validate(updateVitalSchema),
       asyncHandler(this.controller.updateVital.bind(this.controller)),
     );
+
+    // DELETE /api/vitals/:id
+    this.router.delete(
+      "/:id",
+      authenticate,
+      requireRole(ROLES.MEMBER),
+      asyncHandler(this.controller.deleteVital.bind(this.controller)),
+    );
   }
 }

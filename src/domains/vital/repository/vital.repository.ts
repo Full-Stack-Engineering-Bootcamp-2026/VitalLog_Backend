@@ -81,4 +81,8 @@ export class VitalRepository {
     await this.repo.update(id, data);
     return this.repo.findOneOrFail({ where: { id } });
   }
+
+  public async delete(id: number): Promise<void> {
+  await this.repo.delete(id);
+}
 }

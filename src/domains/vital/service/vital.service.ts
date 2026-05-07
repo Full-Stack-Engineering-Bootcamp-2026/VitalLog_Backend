@@ -140,6 +140,16 @@ export class VitalService {
     return this.toResponseDto(updated);
   }
 
+  public async deleteVital(userId: number, vitalId: number): Promise<void> {
+    const vital = await this.vitalRepository.findByUserAndId(userId, vitalId);
+
+    if (!vital) {
+      throw new NotFoundException("Vital entry not found.");
+    }
+
+    await this.vitalRepository.delete(vitalId);
+  }
+
   // Private: Calculate Status
   private calculateVitalStatus(data: CreateVitalRequestDto): RangeStatusType {
     switch (data.vitalType) {

@@ -1,6 +1,10 @@
-import { VitalTypeValue, RangeStatusType } from "../../../common/constants/vital.constant";
+import {
+  VitalTypeValue,
+  RangeStatusType,
+} from "../../../common/constants/vital.constant";
 
-// Request DTOs 
+// Request dto
+//member will send in req body
 export interface CreateVitalRequestDto {
   vitalType: VitalTypeValue;
   value?: number;
@@ -23,8 +27,7 @@ export interface VitalQueryDto {
   limit?: string;
 }
 
-// Response DTOs 
-//VitalOutDto
+// Response dto
 export interface VitalResponseDto {
   id: number;
   vitalType: VitalTypeValue;

@@ -7,22 +7,7 @@ import { VitalTypeValue } from "../../../common/constants/vital.constant";
 export class VitalRepository {
   private readonly repo = AppDataSource.getRepository(Vital);
 
-  public async findById(id: number): Promise<Vital | null> {
-    return this.repo.findOne({
-      where: { id },
-      relations: ["user"],
-    });
-  }
-
-  public async findByUserAndId(
-    userId: number,
-    id: number,
-  ): Promise<Vital | null> {
-    return this.repo.findOne({
-      where: { id, user: { id: userId } },
-    });
-  }
-
+  // Check duplicate: same user + vitalType +loggedDate
   public async findDuplicate(
     userId: number,
     vitalType: VitalTypeValue,
@@ -37,6 +22,7 @@ export class VitalRepository {
     });
   }
 
+  // GET /api/vitals — member's own vitals with filters + pagination
   public async findAllByUser(
     userId: number,
     filters: {
@@ -73,17 +59,26 @@ export class VitalRepository {
     return qb.getManyAndCount();
   }
 
+  // POST /api/vitals — save new vital
   public async create(data: Partial<Vital>): Promise<Vital> {
     const vital = this.repo.create(data);
     return this.repo.save(vital);
   }
 
+  public async findByUserAndId(
+    userId: number,
+    vitalId: number,
+  ): Promise<Vital | null> {
+    return this.repo.findOne({
+      where: {
+        id: vitalId,
+        user: { id: userId },
+      },
+    });
+  }
+
   public async update(id: number, data: Partial<Vital>): Promise<Vital> {
     await this.repo.update(id, data);
     return this.repo.findOneOrFail({ where: { id } });
-  }
-
-  public async delete(id: number): Promise<void> {
-    await this.repo.delete(id);
   }
 }

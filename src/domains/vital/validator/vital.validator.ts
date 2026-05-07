@@ -28,7 +28,9 @@ export const createVitalSchema = Joi.object({
   .custom((val, helpers) => {
     if (
       (val.vitalType === VITAL_TYPE.HEART_RATE ||
-        val.vitalType === VITAL_TYPE.WEIGHT) &&
+        val.vitalType === VITAL_TYPE.WEIGHT ||
+        val.vitalType === VITAL_TYPE.BLOOD_GLUCOSE ||
+        val.vitalType === VITAL_TYPE.SLEEP) &&
       val.value === undefined
     ) {
       return helpers.error("any.invalid", {

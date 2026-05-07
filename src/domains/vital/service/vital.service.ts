@@ -1,43 +1,43 @@
 import { Service } from "typedi";
 import { VitalRepository } from "../repository/vital.repository";
-import { FlagRepository } from "../../flag/repository/flag.repository";
+import { FlagService } from "../../flag/service/flag.service";
+import { UpdateVitalRequestDto } from "../dto/vital.dto";
+import { NotFoundException } from "../../../common/exceptions/not-found.exception";
 import {
   CreateVitalRequestDto,
-  UpdateVitalRequestDto,
   VitalQueryDto,
   VitalResponseDto,
   PaginatedVitalsResponseDto,
 } from "../dto/vital.dto";
-import { assessVital, resolveUnit } from "../helper/vital-range.helper";
 import {
-  RANGE_STATUS,
   VITAL_TYPE,
+  VITAL_RANGES,
+  RANGE_STATUS,
+  RangeStatusType,
 } from "../../../common/constants/vital.constant";
-import {
-  FLAG_SOURCE,
-  FLAG_STATUS,
-} from "../../../common/constants/flag.constant";
-import { NotFoundException } from "../../../common/exceptions/not-found.exception";
 import { BadRequestException } from "../../../common/exceptions/bad-request.exception";
-import { ForbiddenException } from "../../../common/exceptions/forbidden.exception";
 import { Vital } from "../entity/vital.entity";
+import { User } from "../../user/entity/user.entity";
 
 @Service()
 export class VitalService {
   constructor(
     private readonly vitalRepository: VitalRepository,
-    private readonly flagRepository: FlagRepository,
+    private readonly flagService: FlagService,
   ) {}
 
-  // Create 
-
-  public async create(
-    userId: number,
+  private formatDate(date: string): string {
+    return new Date(date).toISOString().split("T")[0];
+  }
+  //Create Vitals
+  public async createVital(
+    //takes full user object not just id, as createSystemFlag() will need full user
+    user: User,
     data: CreateVitalRequestDto,
   ): Promise<VitalResponseDto> {
-    // Duplicate check: same user + vitalType + date
+    // 1. Duplicate check
     const duplicate = await this.vitalRepository.findDuplicate(
-      userId,
+      user.id,
       data.vitalType,
       data.loggedDate,
     );
@@ -48,17 +48,13 @@ export class VitalService {
       );
     }
 
-    // Assess status and severity
-    const { status, severity } = assessVital(
-      data.vitalType,
-      data.value,
-      data.systolicValue,
-      data.diastolicValue,
-    );
+    // 2. Calculate status
+    const status = this.calculateVitalStatus(data);
 
-    const unit = resolveUnit(data.vitalType);
+    // 3. Resolve unit
+    const unit = this.resolveUnit(data.vitalType);
 
-    // Save vital
+    // 4. Save vital
     const vital = await this.vitalRepository.create({
       vitalType: data.vitalType,
       value: data.value,
@@ -66,29 +62,21 @@ export class VitalService {
       diastolicValue: data.diastolicValue,
       unit,
       status,
-      loggedDate: data.loggedDate,
-      user: { id: userId } as never,
+      loggedDate: this.formatDate(data.loggedDate),
+      user,
     });
 
-    // Auto-create system flag if WARNING or CRITICAL
-    if (status !== RANGE_STATUS.NORMAL && severity !== null) {
-      await this.flagRepository.create({
-        source: FLAG_SOURCE.SYSTEM,
-        reason: buildFlagReason(data.vitalType, status, data),
-        category: data.vitalType,
-        severity,
-        status: FLAG_STATUS.OPEN,
-        user: { id: userId } as never,
-        sourceVital: { id: vital.id } as never,
-      });
+    // 5. If WARNING or CRITICAL → create system flag
+    if (status !== RANGE_STATUS.NORMAL) {
+      await this.flagService.createSystemFlag(user, vital, status);
     }
 
-    return toVitalResponseDto(vital);
+    return this.toResponseDto(vital);
   }
 
-  //  Get All (member's own) 
+  // Get My Vitals
 
-  public async findAll(
+  public async getMyVitals(
     userId: number,
     query: VitalQueryDto,
   ): Promise<PaginatedVitalsResponseDto> {
@@ -104,7 +92,7 @@ export class VitalService {
     });
 
     return {
-      data: vitals.map(toVitalResponseDto),
+      data: vitals.map(this.toResponseDto),
       total,
       page,
       limit,
@@ -112,146 +100,165 @@ export class VitalService {
     };
   }
 
-  // Update 
-  public async update(
-    userId: number,
+  public async updateVital(
+    user: User,
     vitalId: number,
     data: UpdateVitalRequestDto,
   ): Promise<VitalResponseDto> {
-    const vital = await this.vitalRepository.findByUserAndId(userId, vitalId);
+    // 1. Find vital — must belong to this user
+    const vital = await this.vitalRepository.findByUserAndId(user.id, vitalId);
 
     if (!vital) {
       throw new NotFoundException("Vital entry not found.");
     }
 
-    // Only owner can update
-    if (vital.user.id !== userId) {
-      throw new ForbiddenException("You do not have access to this vital.");
-    }
+    // 2. Merge new values with existing values
+    const mergedData: CreateVitalRequestDto = {
+      vitalType: vital.vitalType,
+      loggedDate: vital.loggedDate,
+      value: data.value ?? vital.value,
+      systolicValue: data.systolicValue ?? vital.systolicValue,
+      diastolicValue: data.diastolicValue ?? vital.diastolicValue,
+    };
 
-    // Recalculate with merged values
-    const newValue = data.value ?? vital.value;
-    const newSystolicValue = data.systolicValue ?? vital.systolicValue;
-    const newDiastolicValue = data.diastolicValue ?? vital.diastolicValue;
+    // 3. Recalculate status with merged values
+    const status = this.calculateVitalStatus(mergedData);
 
-    const { status, severity } = assessVital(
-      vital.vitalType,
-      newValue,
-      newSystolicValue,
-      newDiastolicValue,
-    );
-
+    // 4. Update vital
     const updated = await this.vitalRepository.update(vitalId, {
-      value: newValue,
-      systolicValue: newSystolicValue,
-      diastolicValue: newDiastolicValue,
+      value: mergedData.value,
+      systolicValue: mergedData.systolicValue,
+      diastolicValue: mergedData.diastolicValue,
       status,
     });
 
-    // Sync system flag based on new status
-    await this.syncSystemFlag(
-      userId,
-      vitalId,
-      vital.vitalType,
-      status,
-      severity,
-      {
-        value: newValue,
-        systolicValue: newSystolicValue,
-        diastolicValue: newDiastolicValue,
-      },
+    // 5. If WARNING or CRITICAL → create system flag
+    if (status !== RANGE_STATUS.NORMAL) {
+      await this.flagService.createSystemFlag(user, updated, status);
+    }
+
+    return this.toResponseDto(updated);
+  }
+
+  // Private: Calculate Status
+  private calculateVitalStatus(data: CreateVitalRequestDto): RangeStatusType {
+    switch (data.vitalType) {
+      case VITAL_TYPE.BLOOD_PRESSURE:
+        return this.assessBloodPressure(
+          data.systolicValue!,
+          data.diastolicValue!,
+        );
+
+      case VITAL_TYPE.HEART_RATE:
+        return this.assessSingleValue(
+          data.value!,
+          VITAL_RANGES[VITAL_TYPE.HEART_RATE],
+        );
+
+      case VITAL_TYPE.BLOOD_GLUCOSE:
+        return this.assessSingleValue(
+          data.value!,
+          VITAL_RANGES[VITAL_TYPE.BLOOD_GLUCOSE],
+        );
+
+      case VITAL_TYPE.WEIGHT:
+        return this.assessSingleValue(
+          data.value!,
+          VITAL_RANGES[VITAL_TYPE.WEIGHT],
+        );
+
+      case VITAL_TYPE.SLEEP:
+        return this.assessSingleValue(
+          data.value!,
+          VITAL_RANGES[VITAL_TYPE.SLEEP],
+        );
+
+      default:
+        return RANGE_STATUS.NORMAL;
+    }
+  }
+
+  // Private: Assess Single Value
+
+  private assessSingleValue(
+    value: number,
+    ranges: {
+      normal: { min: number; max: number };
+      borderline: { min: number; max: number };
+      critical: { min: number; max: number };
+    },
+  ): RangeStatusType {
+    if (value >= ranges.normal.min && value <= ranges.normal.max) {
+      return RANGE_STATUS.NORMAL;
+    }
+
+    if (value >= ranges.borderline.min && value <= ranges.borderline.max) {
+      return RANGE_STATUS.WARNING;
+    }
+
+    if (value >= ranges.critical.min && value <= ranges.critical.max) {
+      return RANGE_STATUS.CRITICAL;
+    }
+
+    // Beyond critical band
+    return RANGE_STATUS.CRITICAL;
+  }
+
+  // Private: Assess Blood Pressure
+
+  private assessBloodPressure(
+    systolic: number,
+    diastolic: number,
+  ): RangeStatusType {
+    const systolicStatus = this.assessSingleValue(
+      systolic,
+      VITAL_RANGES[VITAL_TYPE.BLOOD_PRESSURE].systolic,
     );
 
-    return toVitalResponseDto(updated);
+    const diastolicStatus = this.assessSingleValue(
+      diastolic,
+      VITAL_RANGES[VITAL_TYPE.BLOOD_PRESSURE].diastolic,
+    );
+
+    // Take the worse of the two
+    const rank: Record<RangeStatusType, number> = {
+      [RANGE_STATUS.NORMAL]: 0,
+      [RANGE_STATUS.WARNING]: 1,
+      [RANGE_STATUS.CRITICAL]: 2,
+    };
+
+    return rank[systolicStatus] >= rank[diastolicStatus]
+      ? systolicStatus
+      : diastolicStatus;
   }
 
-  // Delete
-  public async delete(userId: number, vitalId: number): Promise<void> {
-    const vital = await this.vitalRepository.findByUserAndId(userId, vitalId);
+  // Private: Resolve Unit
 
-    if (!vital) {
-      throw new NotFoundException("Vital entry not found.");
-    }
-
-    if (vital.user.id !== userId) {
-      throw new ForbiddenException("You do not have access to this vital.");
-    }
-
-    await this.vitalRepository.delete(vitalId);
-    // FK ON DELETE SET NULL handles sourceVitalId in flags automatically
+  private resolveUnit(vitalType: string): string {
+    const units: Record<string, string> = {
+      [VITAL_TYPE.HEART_RATE]: "bpm",
+      [VITAL_TYPE.BLOOD_PRESSURE]: "mmHg",
+      [VITAL_TYPE.BLOOD_GLUCOSE]: "mg/dL",
+      [VITAL_TYPE.WEIGHT]: "kg",
+      [VITAL_TYPE.SLEEP]: "hours",
+    };
+    return units[vitalType];
   }
 
-  //  Private: sync system flag on update
+  //  Private: Mapper
 
-  private async syncSystemFlag(
-    userId: number,
-    vitalId: number,
-    vitalType: string,
-    status: string,
-    severity: string | null,
-    values: { value?: number; systolicValue?: number; diastolicValue?: number },
-  ): Promise<void> {
-    const existingFlag =
-      await this.flagRepository.findOpenSystemFlagByVital(vitalId);
-
-    if (status === RANGE_STATUS.NORMAL) {
-      // If vital is now normal, resolve any existing system flag
-      if (existingFlag) {
-        await this.flagRepository.update(existingFlag.id, {
-          status: FLAG_STATUS.RESOLVED,
-          resolutionNote: "Auto-resolved: vital returned to normal range.",
-          resolvedAt: new Date(),
-        });
-      }
-      return;
-    }
-
-    // Status is WARNING or CRITICAL
-    if (existingFlag) {
-      // Update existing flag severity if changed
-      await this.flagRepository.update(existingFlag.id, {
-        severity: severity as never,
-        reason: buildFlagReason(vitalType as never, status as never, values),
-      });
-    } else {
-      // Create new flag
-      await this.flagRepository.create({
-        source: FLAG_SOURCE.SYSTEM,
-        reason: buildFlagReason(vitalType as never, status as never, values),
-        category: vitalType,
-        severity: severity as never,
-        status: FLAG_STATUS.OPEN,
-        user: { id: userId } as never,
-        sourceVital: { id: vitalId } as never,
-      });
-    }
+  private toResponseDto(vital: Vital): VitalResponseDto {
+    return {
+      id: vital.id,
+      vitalType: vital.vitalType,
+      value: vital.value,
+      systolicValue: vital.systolicValue,
+      diastolicValue: vital.diastolicValue,
+      unit: vital.unit,
+      status: vital.status,
+      loggedDate: vital.loggedDate,
+      createdAt: vital.createdAt,
+      updatedAt: vital.updatedAt,
+    };
   }
-}
-
-//  Mappers 
-
-function toVitalResponseDto(vital: Vital): VitalResponseDto {
-  return {
-    id: vital.id,
-    vitalType: vital.vitalType,
-    value: vital.value,
-    systolicValue: vital.systolicValue,
-    diastolicValue: vital.diastolicValue,
-    unit: vital.unit,
-    status: vital.status,
-    loggedDate: vital.loggedDate,
-    createdAt: vital.createdAt,
-    updatedAt: vital.updatedAt,
-  };
-}
-
-function buildFlagReason(
-  vitalType: string,
-  status: string,
-  values: { value?: number; systolicValue?: number; diastolicValue?: number },
-): string {
-  if (vitalType === VITAL_TYPE.BLOOD_PRESSURE) {
-    return `Blood pressure reading (${values.systolicValue}/${values.diastolicValue} mmHg) is ${status.toLowerCase()}.`;
-  }
-  return `${vitalType.replace(/_/g, " ")} reading of ${values.value} is ${status.toLowerCase()}.`;
 }

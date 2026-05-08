@@ -14,7 +14,6 @@ import { ROLES } from "../../../common/constants/roles.constants";
 @Service()
 export class FitnessRoutes {
   public router: Router;
-
   constructor(private readonly controller: FitnessController) {
     this.router = Router();
     this.addRoutes();

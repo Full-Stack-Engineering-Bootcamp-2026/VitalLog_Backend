@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import { HttpStatus } from "../constants/http-status.constants";
 import { AuthErrorMessages } from "../constants/auth-error-messages.constants";
 import { RoleType } from "../constants/roles.constants";
+import { AppDataSource } from "../../db/data-source";
+import { User } from "../../domains/user/entity/user.entity";
 export const authenticate = async (
   req: Request,
   res: Response,
@@ -52,6 +54,31 @@ export const authenticate = async (
       res.status(HttpStatus.UNAUTHORIZED).json({
         status: HttpStatus.UNAUTHORIZED,
         message: AuthErrorMessages.INVALID_TOKEN,
+      });
+
+      return;
+    }
+    //must change pass check
+    const userRepository = AppDataSource.getRepository(User);
+
+    const user = await userRepository.findOne({
+      where: { id: payload.id },
+    });
+    //check user exist
+    if (!user) {
+      res.status(HttpStatus.UNAUTHORIZED).json({
+        status: HttpStatus.UNAUTHORIZED,
+        message: AuthErrorMessages.INVALID_TOKEN,
+      });
+
+      return;
+    }
+    const allowedRoutes = ["/auth/force-reset-password", "/auth/logout"];
+
+    if (user.mustChangePassword === true && !allowedRoutes.includes(req.path)) {
+      res.status(HttpStatus.FORBIDDEN).json({
+        status: HttpStatus.FORBIDDEN,
+        message: "Password reset required",
       });
 
       return;

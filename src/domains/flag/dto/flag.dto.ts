@@ -1,56 +1,41 @@
-import {
-  FlagSourceType,
-  FlagSeverityType,
-  FlagStatusType,
-} from "../../../common/constants/flag.constant";
-
-// ─── Request DTOs ─────────────────────────────────────────────────────────────
-
+import { FlagSeverityType } from "../../../common/constants/flag.constant";
+import { FlagSourceType } from "../../../common/constants/flag.constant";
+import { FlagStatusType } from "../../../common/constants/flag.constant";
+import { RoleType } from "../../../common/constants/roles.constants";
 export interface CreateManualFlagRequestDto {
   userId: number;
+  sourceVitalId?: number;
   reason: string;
-  severity: FlagSeverityType;
   category?: string;
+  severity: FlagSeverityType;
 }
-
-export interface ResolveFlagRequestDto {
-  resolutionNote?: string;
+export interface FlagVitalResponseDto {
+  id: number;
+  vitalType: string;
+  value?: number | null;
+  systolicValue?: number | null;
+  diastolicValue?: number | null;
+  unit?: string | null;
+  status: string;
+  loggedDate: string;
 }
-
-export interface FlagQueryDto {
-  status?: string;
-  source?: string;
-  page?: string;
-  limit?: string;
-}
-
-// ─── Response DTOs ────────────────────────────────────────────────────────────
-
-export interface FlaggedUserDto {
+export interface FlagUserResponseDto {
   id: number;
   name: string;
   email: string;
+  role: RoleType;
 }
-
-export interface FlagResponseDto {
+export interface CreateFlagResponseDto {
   id: number;
   source: FlagSourceType;
   reason: string;
-  category?: string;
+  category?: string | null;
   severity: FlagSeverityType;
   status: FlagStatusType;
-  resolutionNote?: string;
-  resolvedAt?: Date;
+  resolutionNote?: string | null;
+  resolvedAt?: Date | null;
   createdAt: Date;
-  user: FlaggedUserDto;
-  resolvedBy?: FlaggedUserDto;
-  sourceVitalId?: number;
-}
 
-export interface PaginatedFlagsResponseDto {
-  data: FlagResponseDto[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  user: FlagUserResponseDto;
+  sourceVital?: FlagVitalResponseDto | null;
 }

@@ -1,5 +1,6 @@
 import { Service } from "typedi";
 import { FitnessRepository } from "../repository/fitness.repository";
+import { StreakService } from "../../streak/service/streak.service"
 import {
   CreateFitnessLogRequestDto,
   UpdateFitnessLogRequestDto,
@@ -13,7 +14,10 @@ import { User } from "../../user/entity/user.entity";
 
 @Service()
 export class FitnessService {
-  constructor(private readonly fitnessRepository: FitnessRepository) {}
+  constructor(private readonly fitnessRepository: FitnessRepository,
+    private readonly streakService: StreakService,
+
+  ) {}
 
   public async createLog(
     user: User,
@@ -27,7 +31,7 @@ export class FitnessService {
       notes: data.notes,
       user,
     });
-
+    await this.streakService.updateStreak(user.id)
     return this.toResponseDto(log);
   }
 

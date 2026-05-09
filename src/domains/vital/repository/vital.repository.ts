@@ -83,6 +83,14 @@ export class VitalRepository {
   }
 
   public async delete(id: number): Promise<void> {
-  await this.repo.delete(id);
-}
+    await this.repo.delete(id);
+  }
+
+  public async findById(id: number): Promise<Vital | null> {
+    return this.repo.findOne({
+      where: { id },
+
+      relations: ["user"],
+    });
+  }
 }

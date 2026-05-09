@@ -15,7 +15,21 @@ const passwordSchema = Joi.string() //joi.string,joi.number,joi.object,joi.array
     "string.pattern.base":
       "Password must contain uppercase, lowercase, number and special character",
   });
-
+const forceResetPasswordValidation = Joi.string()
+  .min(12)
+  .max(64)
+  .pattern(/[A-Z]/)
+  .pattern(/[a-z]/)
+  .pattern(/[0-9]/)
+  .pattern(/[^A-Za-z0-9]/)
+  .required()
+  .messages({
+    "string.empty": "Password is required",
+    "string.min": "Password must be at least 12 characters",
+    "string.max": "Password cant exceed 64 characters",
+    "string.pattern.base":
+      "Password must contain uppercase, lowercase, number and special character",
+  });
 //register schema
 export const registerSchema = Joi.object({
   name: Joi.string().trim().min(2).max(100).required().messages({
@@ -71,7 +85,7 @@ export const resetPasswordSchema = Joi.object({
 });
 
 export const forceResetPasswordSchema = Joi.object({
-  password: passwordSchema,
+  password: forceResetPasswordValidation,
 
   confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
     "any.only": "Passwords do not match", //any.only for valid
@@ -87,7 +101,7 @@ export const changePasswordSchema = Joi.object({
   newPassword: passwordSchema,
 
   confirmNewPassword: Joi.string()
-    .valid(Joi.ref("newPassword"))
+    .valid(Joi.ref("newPassword")) //take ref and compare if same
     .required()
     .messages({
       "any.only": "Passwords do not match",

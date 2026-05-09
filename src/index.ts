@@ -18,6 +18,7 @@ import { AuthRoutes } from "./domains/user/route/auth.routes";
 import { AdminRoutes } from "./domains/user/route/admin.routes";
 import { VitalRoutes } from "./domains/vital/route/vital.routes";
 import { FitnessRoutes } from "./domains/fitness/route/fitness.route";
+import { FlagRoutes } from "./domains/flag/route/flag.routes";
 class Application {
   public app: Express;
   private port: number;
@@ -66,11 +67,12 @@ class Application {
     const adminRoutes = Container.get(AdminRoutes);
     const vitalRoutes = Container.get(VitalRoutes);
     const fitnessRoutes = Container.get(FitnessRoutes);
-
+    const flagRoutes = Container.get(FlagRoutes);
     v1Router.use("/auth", authRoutes.getRoutes());
     v1Router.use("/admin", adminRoutes.getRoutes());
     v1Router.use("/vitals", vitalRoutes.getRoutes());
     v1Router.use("/fitness", fitnessRoutes.getRoutes());
+    v1Router.use("/flag", flagRoutes.getRoutes());
     this.app.use("/api/v1", v1Router);
 
     console.log("Routes initialized");

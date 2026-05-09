@@ -1,3 +1,4 @@
+import { UserRepository } from "./../../user/repository/user.repository";
 import { Service } from "typedi";
 import { FlagRepository } from "../repository/flag.repository";
 import { Vital } from "../../vital/entity/vital.entity";
@@ -12,10 +13,17 @@ import {
   RANGE_STATUS,
   RangeStatusType,
 } from "../../../common/constants/vital.constant";
-
+import { NotFoundException } from "../../../common/exceptions";
+import { CreateManualFlagRequestDto } from "../dto/flag.dto";
+import { VitalRepository } from "../../vital/repository/vital.repository";
+import { CreateFlagResponseDto } from "../dto/flag.dto";
 @Service()
 export class FlagService {
-  constructor(private readonly flagRepository: FlagRepository) {}
+  constructor(
+    private readonly flagRepository: FlagRepository,
+    private readonly userRepository: UserRepository,
+    private readonly vitalRepository: VitalRepository,
+  ) {}
 
   public async createSystemFlag(
     user: User,
@@ -49,5 +57,61 @@ export class FlagService {
       return `Blood pressure reading of ${vital.systolicValue}/${vital.diastolicValue} mmHg is ${status.toLowerCase()}.`;
     }
     return `${vital.vitalType.replace(/_/g, " ")} reading of ${vital.value} ${vital.unit ?? ""} is ${status.toLowerCase()}.`;
+  }
+
+  //create manual flag
+  public async createManualFlag(
+    data: CreateManualFlagRequestDto,
+  ): Promise<CreateFlagResponseDto> {
+    const user = await this.userRepository.findById(data.userId);
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    let sourceVital = null;
+    if (data.sourceVitalId) {
+      sourceVital = await this.vitalRepository.findById(data.sourceVitalId);
+    }
+    if (data.sourceVitalId && !sourceVital) {
+      throw new NotFoundException("Source vital not found");
+    }
+    const flag = await this.flagRepository.create({
+      source: FLAG_SOURCE.MANUAL,
+      reason: data.reason,
+      category: data.category,
+      severity: data.severity,
+      status: FLAG_STATUS.OPEN,
+      user,
+      sourceVital: sourceVital || undefined,
+    });
+
+    return {
+      id: flag.id,
+      source: flag.source,
+      reason: flag.reason,
+      category: flag.category || null,
+      severity: flag.severity,
+      status: flag.status,
+      resolutionNote: flag.resolutionNote || null,
+      resolvedAt: flag.resolvedAt || null,
+      createdAt: flag.createdAt,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      sourceVital: sourceVital //source vital present then return or null
+        ? {
+            id: sourceVital.id,
+            vitalType: sourceVital.vitalType,
+            value: sourceVital.value || null,
+            systolicValue: sourceVital.systolicValue || null,
+            diastolicValue: sourceVital.diastolicValue || null,
+            unit: sourceVital.unit || null,
+            status: sourceVital.status,
+            loggedDate: sourceVital.loggedDate,
+          }
+        : null,
+    };
   }
 }

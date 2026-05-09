@@ -1,6 +1,7 @@
 import { Service } from "typedi";
 import { VitalRepository } from "../repository/vital.repository";
 import { FlagService } from "../../flag/service/flag.service";
+import { StreakService } from "../../streak/service/streak.service"
 import { UpdateVitalRequestDto } from "../dto/vital.dto";
 import { NotFoundException } from "../../../common/exceptions/not-found.exception";
 import {
@@ -24,6 +25,7 @@ export class VitalService {
   constructor(
     private readonly vitalRepository: VitalRepository,
     private readonly flagService: FlagService,
+    private readonly streakService: StreakService,
   ) {}
 
   private formatDate(date: string): string {
@@ -65,6 +67,8 @@ export class VitalService {
       loggedDate: this.formatDate(data.loggedDate),
       user,
     });
+
+    await this.streakService.updateStreak(user.id)
 
     // 5. If WARNING or CRITICAL → create system flag
     if (status !== RANGE_STATUS.NORMAL) {
@@ -254,7 +258,6 @@ export class VitalService {
     };
     return units[vitalType];
   }
-
   //  Private: Mapper
 
   private toResponseDto(vital: Vital): VitalResponseDto {

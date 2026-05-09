@@ -18,6 +18,7 @@ import { AuthRoutes } from "./domains/user/route/auth.routes";
 import { AdminRoutes } from "./domains/user/route/admin.routes";
 import { VitalRoutes } from "./domains/vital/route/vital.routes";
 import { FitnessRoutes } from "./domains/fitness/route/fitness.route";
+import { StreakRoutes } from "./domains/streak/route/streak.routes"
 import { FlagRoutes } from "./domains/flag/route/flag.routes";
 import { ProfileRoutes } from "./domains/profile/route/profile.routes";
 class Application {
@@ -35,7 +36,7 @@ class Application {
 
   private initializeMiddleware(): void {
     const allowedOrigins = (
-      process.env.ALLOWED_ORIGINS || "http://localhost:5173"
+      process.env.ALLOWED_ORIGINS || "http://localhost:5174"
     ).split(",");
 
     this.app.use(
@@ -68,12 +69,15 @@ class Application {
     const adminRoutes = Container.get(AdminRoutes);
     const vitalRoutes = Container.get(VitalRoutes);
     const fitnessRoutes = Container.get(FitnessRoutes);
+    const streakRoutes = Container.get(StreakRoutes)
+
     const flagRoutes = Container.get(FlagRoutes);
     const profileRoutes = Container.get(ProfileRoutes);
     v1Router.use("/auth", authRoutes.getRoutes());
     v1Router.use("/admin", adminRoutes.getRoutes());
     v1Router.use("/vitals", vitalRoutes.getRoutes());
     v1Router.use("/fitness", fitnessRoutes.getRoutes());
+    v1Router.use("/streak", streakRoutes.getRoutes());
     v1Router.use("/flag", flagRoutes.getRoutes());
     v1Router.use("/profile", profileRoutes.getRoutes());
     this.app.use("/api/v1", v1Router);

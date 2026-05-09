@@ -34,10 +34,10 @@ export const createManualFlagSchema = Joi.object({
   category: Joi.string().trim().max(100).optional(),
 });
 
-// // resolve flag schema
-// export const resolveFlagSchema = Joi.object({
-//   resolutionNote: Joi.string().trim().max(500).optional(),
-// });
+// resolve flag schema
+export const resolveFlagSchema = Joi.object({
+  resolutionNote: Joi.string().trim().max(500).optional(),
+});
 
 // // query params schema
 // export const flagQuerySchema = Joi.object({

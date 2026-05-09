@@ -17,6 +17,7 @@ import { NotFoundException } from "../../../common/exceptions";
 import { CreateManualFlagRequestDto } from "../dto/flag.dto";
 import { VitalRepository } from "../../vital/repository/vital.repository";
 import { CreateFlagResponseDto } from "../dto/flag.dto";
+import { ResolveFlagRequestDto, ResolveFlagResponseDto } from "../dto/flag.dto";
 @Service()
 export class FlagService {
   constructor(
@@ -112,6 +113,43 @@ export class FlagService {
             loggedDate: sourceVital.loggedDate,
           }
         : null,
+    };
+  }
+
+  //resolve flag(flag id,staff id,note)
+  public async resolveFlag(
+    flagId: number,
+    staffId: number,
+    data: ResolveFlagRequestDto,
+  ): Promise<ResolveFlagResponseDto> {
+    const flag = await this.flagRepository.findById(flagId);
+
+    if (!flag) {
+      throw new NotFoundException("Flag not found");
+    }
+    const staff = await this.userRepository.findById(staffId);
+
+    if (!staff) {
+      throw new NotFoundException("Staff not found");
+    }
+    const updatedFlag = await this.flagRepository.update(flagId, {
+      status: FLAG_STATUS.RESOLVED,
+      resolutionNote: data.resolutionNote,
+      resolvedAt: new Date(),
+      resolvedBy: staff,
+    });
+    //return flag id ,staff info,resolve status,note
+    return {
+      id: updatedFlag.id,
+      status: updatedFlag.status,
+      resolutionNote: updatedFlag.resolutionNote || "",
+      resolvedAt: updatedFlag.resolvedAt as Date,
+      resolvedBy: {
+        id: staff.id,
+        name: staff.name,
+        email: staff.email,
+        role: staff.role,
+      },
     };
   }
 }

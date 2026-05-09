@@ -39,3 +39,15 @@ export interface CreateFlagResponseDto {
   user: FlagUserResponseDto;
   sourceVital?: FlagVitalResponseDto | null;
 }
+export interface ResolveFlagRequestDto {
+  resolutionNote: string;
+}
+
+export interface ResolveFlagResponseDto {
+  id: number;
+  status: FlagStatusType;
+  resolutionNote: string;
+  resolvedAt: Date;
+
+  resolvedBy: FlagUserResponseDto;
+}

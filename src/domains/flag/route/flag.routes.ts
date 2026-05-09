@@ -7,6 +7,7 @@ import { authenticate } from "../../../common/middleware/authenticate.middleware
 import { ROLES } from "../../../common/constants/roles.constants";
 import { requireRole } from "../../../common/middleware/authorize.middleware";
 import { createManualFlagSchema } from "../validator/flag.validator";
+import { resolveFlagSchema } from "../validator/flag.validator";
 @Service()
 export class FlagRoutes {
   public router: Router;
@@ -27,6 +28,14 @@ export class FlagRoutes {
       requireRole(ROLES.STAFF),
       validate(createManualFlagSchema),
       asyncHandler(this.controller.createManualFlag.bind(this.controller)),
+    );
+
+    this.router.patch(
+      "/:id/resolve",
+      authenticate,
+      requireRole(ROLES.STAFF),
+      validate(resolveFlagSchema),
+      asyncHandler(this.controller.resolveFlag.bind(this.controller)),
     );
   }
 }

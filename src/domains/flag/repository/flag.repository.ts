@@ -1,7 +1,7 @@
 import { Service } from "typedi";
 import { AppDataSource } from "../../../db/data-source";
 import { Flag } from "../entity/flag.entity";
-
+import { FlagStatusType } from "../../../common/constants/flag.constant";
 @Service()
 export class FlagRepository {
   private readonly repo = AppDataSource.getRepository(Flag);
@@ -26,5 +26,29 @@ export class FlagRepository {
       where: { id },
       relations: ["user", "resolvedBy", "sourceVital"],
     });
+  }
+  //take page ,limit,status=>OPEN/RESOLVED & return current page data $ total cnt
+  public async findAllPaginated(filters: {
+    page: number;
+    limit: number;
+    status?: FlagStatusType;
+  }): Promise<[Flag[], number]> {
+    const qb = this.repo
+      .createQueryBuilder("flag") //SELECT * FROM flags flag
+      .leftJoinAndSelect("flag.user", "user")
+      .leftJoinAndSelect("flag.resolvedBy", "resolvedBy")
+      .leftJoinAndSelect("flag.sourceVital", "sourceVital")
+      .orderBy("flag.createdAt", "DESC"); //ORDER BY createdAt DESC
+
+    if (filters.status) {
+      //WHERE flag.status = 'OPEN'
+      qb.andWhere("flag.status = :status", {
+        status: filters.status,
+      });
+    }
+
+    const offset = (filters.page - 1) * filters.limit;
+    qb.skip(offset).take(filters.limit); //LIMIT OFFSET
+    return await qb.getManyAndCount(); //getMany=>only rows , getCount=>cnt
   }
 }

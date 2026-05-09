@@ -39,6 +39,20 @@ export const resolveFlagSchema = Joi.object({
   resolutionNote: Joi.string().trim().max(500).optional(),
 });
 
+//pagination schema
+export const getFlagsSchema = Joi.object({
+  page: Joi.number().optional(),
+
+  limit: Joi.number().optional(),
+
+  status: Joi.string()
+    .valid(...Object.values(FLAG_STATUS))
+    .optional()
+    .messages({
+      "any.only": "Status must be OPEN or RESOLVED",
+    }),
+});
+
 // // query params schema
 // export const flagQuerySchema = Joi.object({
 //   status: Joi.string()

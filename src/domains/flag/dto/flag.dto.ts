@@ -51,3 +51,38 @@ export interface ResolveFlagResponseDto {
 
   resolvedBy: FlagUserResponseDto;
 }
+///api/v1/flags?page=1&limit=5&status=RESOLVED
+export interface GetFlagsRequestDto {
+  page: number;
+  limit: number;
+  status?: FlagStatusType;
+}
+export interface FlagListItemResponseDto {
+  id: number;
+  source: FlagSourceType;
+  reason: string;
+  category?: string | null;
+  severity: FlagSeverityType;
+  status: FlagStatusType;
+  createdAt: Date;
+  resolvedAt?: Date | null;
+
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+
+  resolvedBy?: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+}
+export interface GetFlagsResponseDto {
+  flags: FlagListItemResponseDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

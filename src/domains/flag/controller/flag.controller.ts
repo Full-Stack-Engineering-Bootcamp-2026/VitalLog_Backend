@@ -5,6 +5,7 @@ import { CreateManualFlagRequestDto } from "../dto/flag.dto";
 import { generateResponse } from "../../../common/utils/response.util";
 import { HttpStatus } from "../../../common/constants/http-status.constants";
 import { ResolveFlagRequestDto } from "../dto/flag.dto";
+import { GetFlagsRequestDto } from "../dto/flag.dto";
 @Service()
 export class FlagController {
   constructor(private readonly service: FlagService) {}
@@ -34,6 +35,20 @@ export class FlagController {
     return generateResponse(res, {
       statusCode: HttpStatus.OK,
       message: "Flag resolved successfully",
+      data,
+    });
+  }
+
+  public async getFlags(req: Request, res: Response): Promise<Response> {
+    const data = await this.service.getFlags({
+      page: Number(req.query.page),
+      limit: Number(req.query.limit),
+      status: req.query.status as GetFlagsRequestDto["status"],
+    });
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "Flags fetched successfully",
       data,
     });
   }

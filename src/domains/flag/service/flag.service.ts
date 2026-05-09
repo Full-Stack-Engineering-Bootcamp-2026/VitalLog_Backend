@@ -18,6 +18,8 @@ import { CreateManualFlagRequestDto } from "../dto/flag.dto";
 import { VitalRepository } from "../../vital/repository/vital.repository";
 import { CreateFlagResponseDto } from "../dto/flag.dto";
 import { ResolveFlagRequestDto, ResolveFlagResponseDto } from "../dto/flag.dto";
+import { GetFlagsRequestDto } from "../dto/flag.dto";
+import { GetFlagsResponseDto } from "../dto/flag.dto";
 @Service()
 export class FlagService {
   constructor(
@@ -150,6 +152,51 @@ export class FlagService {
         email: staff.email,
         role: staff.role,
       },
+    };
+  }
+
+  public async getFlags(
+    query: GetFlagsRequestDto,
+  ): Promise<GetFlagsResponseDto> {
+    const page = query.page;
+    const limit = query.limit;
+    const status = query.status;
+    const [flags, total] = await this.flagRepository.findAllPaginated({
+      page,
+      limit,
+      status,
+    });
+
+    return {
+      flags: flags.map((flag) => ({
+        id: flag.id,
+        source: flag.source,
+        reason: flag.reason,
+        category: flag.category || null,
+        severity: flag.severity,
+        status: flag.status,
+        createdAt: flag.createdAt,
+        resolvedAt: flag.resolvedAt || null,
+
+        user: {
+          id: flag.user.id,
+          name: flag.user.name,
+          email: flag.user.email,
+        },
+
+        resolvedBy: flag.resolvedBy
+          ? {
+              id: flag.resolvedBy.id,
+              name: flag.resolvedBy.name,
+              email: flag.resolvedBy.email,
+            }
+          : null,
+      })),
+
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     };
   }
 }

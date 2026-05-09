@@ -16,22 +16,22 @@ export class ProfileService {
 
   public async uploadProfileImage(
     userId: number,
-    file?: Express.Multer.File,
+    file?: Express.Multer.File, //receive img from multer
   ): Promise<UploadProfileImageResponseDto> {
     if (!file) {
       throw new BadRequestException("Profile image is required");
     }
-
+    //extract extension=> .png etc
     const extension = file.originalname.split(".").pop();
-
-    const fileName = `profiles/user-${userId}-${Date.now()}.${extension}`;
+    //generate unique file name =>profiles/user-5-17152555.png
+    const fileName = `profiles/user-${userId}-${Date.now()}.${extension}`; //filekey
 
     await this.storageService.uploadFile(file, fileName);
-
+    //saved filekey
     await this.profileRepository.updateByUserId(userId, {
       profileImageUrl: fileName,
     });
-
+    //generate signed url
     const signedUrl = await this.storageService.getSignedFileUrl(fileName);
 
     return {

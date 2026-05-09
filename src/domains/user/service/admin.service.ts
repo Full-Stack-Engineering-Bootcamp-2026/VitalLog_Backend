@@ -12,12 +12,14 @@ import { ForceResetPasswordRequestDto } from "../dto/auth.dto";
 import { CreateStaffRequestDto } from "../dto/admin.dto";
 import { StaffResponseDto } from "../dto/admin.dto";
 import { EmailService } from "../../../common/services/email.service";
+import { ProfileRepository } from "../../profile/repository/profile.repository";
 import crypto from "crypto";
 @Service()
 export class AdminService {
   constructor(
     private readonly repository: UserRepository,
     private readonly emailService: EmailService,
+    private readonly profileRepository: ProfileRepository,
   ) {}
   public async createStaff(
     data: CreateStaffRequestDto,
@@ -45,6 +47,9 @@ export class AdminService {
       mustChangePassword: true,
     });
 
+    await this.profileRepository.create({
+      user,
+    });
     await this.emailService.sendStaffCredentialsEmail({
       to: user.email,
       name: user.name,

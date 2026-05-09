@@ -25,12 +25,13 @@ import { EmailService } from "../../../common/services/email.service";
 import { ForgotPasswordRequestDto } from "../dto/auth.dto";
 import { ResetPasswordRequestDto } from "../dto/auth.dto";
 import crypto from "crypto";
-
+import { ProfileRepository } from "../../profile/repository/profile.repository";
 @Service()
 export class AuthService {
   constructor(
     private readonly repository: UserRepository,
     private readonly emailService: EmailService,
+    private readonly profileRepository: ProfileRepository,
   ) {}
 
   public async register(
@@ -53,6 +54,10 @@ export class AuthService {
       role: ROLES.MEMBER,
       isActive: true,
       mustChangePassword: false,
+    });
+
+    await this.profileRepository.create({
+      user,
     });
 
     const responseUser: UserResponseDto = {

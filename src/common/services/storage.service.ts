@@ -2,6 +2,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
+  HeadBucketCommand, 
   S3Client,
 } from "@aws-sdk/client-s3";
 
@@ -22,6 +23,12 @@ export class StorageService {
         secretAccessKey: process.env.B2_SECRET_ACCESS_KEY as string,
       },
     });
+  }
+
+  public async checkConnection(): Promise<void> {
+    await this.client.send(
+      new HeadBucketCommand({ Bucket: process.env.B2_BUCKET_NAME }),
+    );
   }
 
   public async uploadFile(

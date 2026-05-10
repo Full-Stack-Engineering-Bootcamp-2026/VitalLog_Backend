@@ -2,6 +2,8 @@ import { GenderType } from "../../../common/constants/gender.constants";
 
 export interface ProfileResponseDto {
   id: number;
+  name: string;
+  email: string;
   age?: number | null;
   gender?: GenderType | null;
   height?: number | null;

@@ -38,5 +38,14 @@ export class AdminRoutes {
       requireAnyRole(ROLES.ADMIN, ROLES.STAFF),
       asyncHandler(this.controller.getRegistrationTrend.bind(this.controller)),
     );
+
+    this.router.get(
+      "/flagged-vitals-distribution",
+      authenticate,
+      requireAnyRole(ROLES.ADMIN, ROLES.STAFF),
+      asyncHandler(
+        this.controller.getFlaggedVitalsDistribution.bind(this.controller),
+      ),
+    );
   }
 }

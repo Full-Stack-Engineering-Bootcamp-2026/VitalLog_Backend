@@ -31,3 +31,11 @@ export interface RegistrationTrendItemDto {
 export interface RegistrationTrendResponseDto {
   days: RegistrationTrendItemDto[];
 }
+export interface FlaggedVitalsDistributionItemDto {
+  vitalType: string;
+  count: number;
+}
+
+export interface FlaggedVitalsDistributionResponseDto {
+  items: FlaggedVitalsDistributionItemDto[];
+}

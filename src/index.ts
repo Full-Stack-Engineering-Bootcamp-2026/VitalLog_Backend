@@ -87,6 +87,7 @@ class Application {
     v1Router.use("/profile", profileRoutes.getRoutes());
     v1Router.use("/staff", staffRoutes.getRoutes());
     v1Router.use("/admin/dashboard", adminDashboardRoutes.getRoutes());
+
     this.app.use("/api/v1", v1Router);
 
     console.log("Routes initialized");

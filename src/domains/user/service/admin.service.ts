@@ -16,6 +16,7 @@ import { ProfileRepository } from "../../profile/repository/profile.repository";
 import crypto from "crypto";
 import { AdminDashboardRepository } from "../repository/admin.repository";
 import { RegistrationTrendResponseDto } from "../dto/admin.dto";
+import { FlaggedVitalsDistributionResponseDto } from "../dto/admin.dto";
 @Service()
 export class AdminService {
   constructor(
@@ -77,6 +78,17 @@ export class AdminService {
     return {
       days: rows.map((row) => ({
         date: row.date,
+        count: Number(row.count),
+      })),
+    };
+  }
+
+  public async getFlaggedVitalsDistribution(): Promise<FlaggedVitalsDistributionResponseDto> {
+    const rows = await this.adminRepository.getFlaggedVitalsDistribution();
+
+    return {
+      items: rows.map((row) => ({
+        vitalType: row.vitalType,
         count: Number(row.count),
       })),
     };

@@ -38,7 +38,7 @@ class Application {
 
   private initializeMiddleware(): void {
     const allowedOrigins = (
-      process.env.ALLOWED_ORIGINS || "http://localhost:5173"
+      process.env.ALLOWED_ORIGINS || "http://localhost:5174"
     ).split(",");
 
     this.app.use(

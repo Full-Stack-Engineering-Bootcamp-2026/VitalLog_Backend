@@ -1,4 +1,4 @@
-// Matches migration ENUM exactly
+
 export const VITAL_TYPE = {
   HEART_RATE: "HEART_RATE",
   BLOOD_PRESSURE: "BLOOD_PRESSURE",
@@ -9,7 +9,6 @@ export const VITAL_TYPE = {
 
 export type VitalTypeValue = (typeof VITAL_TYPE)[keyof typeof VITAL_TYPE];
 
-// Matches migration ENUM exactly: 'NORMAL', 'WARNING', 'CRITICAL'
 export const RANGE_STATUS = {
   NORMAL: "NORMAL",
   WARNING: "WARNING",

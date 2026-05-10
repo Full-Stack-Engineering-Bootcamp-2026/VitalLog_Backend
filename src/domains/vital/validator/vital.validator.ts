@@ -1,6 +1,9 @@
 import Joi from "joi";
 import { VITAL_TYPE } from "../../../common/constants/vital.constant";
 
+// returns today's date fresh on every call — avoids stale date if server runs for days
+const getToday = () => new Date().toISOString().split("T")[0];
+
 //now this will create an object validation schema , how our reuest body must look like
 export const createVitalSchema = Joi.object({
   vitalType: Joi.string()
@@ -12,17 +15,31 @@ export const createVitalSchema = Joi.object({
       "any.required": "vitalType is required.",
     }),
 
-  //must be number ,minimun
-  value: Joi.number().min(0).optional(),
+  //must be number, min/max based on critical band from vital.constants.ts
+  // heart rate(40-130), blood glucode(50-200), weight(20-150), sleep(3-12)
+  value: Joi.number().min(0).max(200).optional(),
 
-  systolicValue: Joi.number().min(0).optional(),
+  // blood pressure systolic critical band: 70-160
+  systolicValue: Joi.number().min(40).max(160).optional(),
 
-  diastolicValue: Joi.number().min(0).optional(),
+  // blood pressure diastolic critical band: 40-100
+  diastolicValue: Joi.number().min(40).max(100).optional(),
 
-  loggedDate: Joi.string().isoDate().required().messages({
-    "string.pattern.base": "loggedDate must be in YYYY-MM-DD format.",
-    "any.required": "loggedDate is required.",
-  }),
+  // cannot be a future date
+  loggedDate: Joi.string()
+    .isoDate()
+    .custom((value, helpers) => {
+      if (value > getToday()) {
+        return helpers.error("date.future");
+      }
+      return value;
+    })
+    .required()
+    .messages({
+      "string.pattern.base": "loggedDate must be in YYYY-MM-DD format.",
+      "date.future": "loggedDate cannot be in the future.",
+      "any.required": "loggedDate is required.",
+    }),
 })
   // cross-field validation — enforce correct fields per vitalType
   .custom((val, helpers) => {
@@ -51,9 +68,10 @@ export const createVitalSchema = Joi.object({
   });
 
 export const updateVitalSchema = Joi.object({
-  value: Joi.number().min(0).optional(),
-  systolicValue: Joi.number().min(0).optional(),
-  diastolicValue: Joi.number().min(0).optional(),
+  //must be number, min/max based on critical band from vital.constants.ts
+  value: Joi.number().min(0).max(200).optional(),
+  systolicValue: Joi.number().min(40).max(160).optional(),
+  diastolicValue: Joi.number().min(40).max(100).optional(),
 }).custom((val, helpers) => {
   const hasValue = val.value !== undefined;
   const hasBP =

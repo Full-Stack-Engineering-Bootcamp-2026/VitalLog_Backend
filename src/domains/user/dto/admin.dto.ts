@@ -23,3 +23,11 @@ export interface StaffResponseDto {
   mustChangePassword: boolean;
   createdAt: Date;
 }
+export interface RegistrationTrendItemDto {
+  date: string;
+  count: number;
+}
+
+export interface RegistrationTrendResponseDto {
+  days: RegistrationTrendItemDto[];
+}

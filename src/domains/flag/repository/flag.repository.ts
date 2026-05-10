@@ -1,7 +1,10 @@
 import { Service } from "typedi";
 import { AppDataSource } from "../../../db/data-source";
 import { Flag } from "../entity/flag.entity";
-import { FlagStatusType } from "../../../common/constants/flag.constant";
+import {
+  FLAG_STATUS,
+  FlagStatusType,
+} from "../../../common/constants/flag.constant";
 @Service()
 export class FlagRepository {
   private readonly repo = AppDataSource.getRepository(Flag);
@@ -59,5 +62,17 @@ export class FlagRepository {
     const offset = (filters.page - 1) * filters.limit;
     qb.skip(offset).take(filters.limit); //LIMIT OFFSET
     return await qb.getManyAndCount(); //getMany=>only rows , getCount=>cnt
+  }
+  //All open flags of user
+  public async findOpenFlagsByUserId(userId: number): Promise<Flag[]> {
+    return await this.repo.find({
+      where: {
+        user: { id: userId },
+        status: FLAG_STATUS.OPEN,
+      },
+      order: {
+        createdAt: "DESC",
+      },
+    });
   }
 }

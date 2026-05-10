@@ -16,9 +16,10 @@ export const upload = multer({
       return callback(
         new BadRequestException(
           "Only JPEG, JPG, PNG and WEBP images are allowed",
-        ) as unknown as null,
+        ),
       );
     }
+
     callback(null, true);
   },
 });

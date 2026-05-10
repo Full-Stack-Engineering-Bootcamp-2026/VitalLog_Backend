@@ -22,6 +22,7 @@ import { StreakRoutes } from "./domains/streak/route/streak.routes";
 import { FlagRoutes } from "./domains/flag/route/flag.routes";
 import { ProfileRoutes } from "./domains/profile/route/profile.routes";
 import { StorageService } from "./common/services/storage.service";
+import { StaffRoutes } from "./domains/user/route/staff.routes";
 class Application {
   public app: Express;
   private port: number;
@@ -74,6 +75,7 @@ class Application {
 
     const flagRoutes = Container.get(FlagRoutes);
     const profileRoutes = Container.get(ProfileRoutes);
+    const staffRoutes = Container.get(StaffRoutes);
     v1Router.use("/auth", authRoutes.getRoutes());
     v1Router.use("/admin", adminRoutes.getRoutes());
     v1Router.use("/vitals", vitalRoutes.getRoutes());
@@ -81,6 +83,7 @@ class Application {
     v1Router.use("/streak", streakRoutes.getRoutes());
     v1Router.use("/flag", flagRoutes.getRoutes());
     v1Router.use("/profile", profileRoutes.getRoutes());
+    v1Router.use("/staff", staffRoutes.getRoutes());
     this.app.use("/api/v1", v1Router);
 
     console.log("Routes initialized");
@@ -95,22 +98,22 @@ class Application {
   }
 
   public async start(): Promise<void> {
-  try {
-    await AppDataSource.initialize();
-    console.log("Database connected");
+    try {
+      await AppDataSource.initialize();
+      console.log("Database connected");
 
-    const storageService = Container.get(StorageService);
-    await storageService.checkConnection();
-    console.log("Storage connected");
+      const storageService = Container.get(StorageService);
+      await storageService.checkConnection();
+      console.log("Storage connected");
 
-    this.app.listen(this.port, () => {
-      console.log(`Server running on port ${this.port}`);
-    });
-  } catch (error) {
-    console.error("Startup error", error);
-    process.exit(1);
+      this.app.listen(this.port, () => {
+        console.log(`Server running on port ${this.port}`);
+      });
+    } catch (error) {
+      console.error("Startup error", error);
+      process.exit(1);
+    }
   }
-}
 }
 
 const application = new Application();

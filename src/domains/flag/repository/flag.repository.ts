@@ -1,7 +1,10 @@
 import { Service } from "typedi";
 import { AppDataSource } from "../../../db/data-source";
 import { Flag } from "../entity/flag.entity";
-import { FlagStatusType } from "../../../common/constants/flag.constant";
+import {
+  FLAG_STATUS,
+  FlagStatusType,
+} from "../../../common/constants/flag.constant";
 @Service()
 export class FlagRepository {
   private readonly repo = AppDataSource.getRepository(Flag);
@@ -32,6 +35,7 @@ export class FlagRepository {
     page: number;
     limit: number;
     status?: FlagStatusType;
+    search?: string;
   }): Promise<[Flag[], number]> {
     const qb = this.repo
       .createQueryBuilder("flag") //SELECT * FROM flags flag
@@ -46,9 +50,29 @@ export class FlagRepository {
         status: filters.status,
       });
     }
+    if (filters.search) {
+      qb.andWhere(
+        "(user.name LIKE :search OR user.email LIKE :search OR flag.reason LIKE :search)",
+        {
+          search: `%${filters.search}%`,
+        },
+      );
+    }
 
     const offset = (filters.page - 1) * filters.limit;
     qb.skip(offset).take(filters.limit); //LIMIT OFFSET
     return await qb.getManyAndCount(); //getMany=>only rows , getCount=>cnt
+  }
+  //All open flags of user
+  public async findOpenFlagsByUserId(userId: number): Promise<Flag[]> {
+    return await this.repo.find({
+      where: {
+        user: { id: userId },
+        status: FLAG_STATUS.OPEN,
+      },
+      order: {
+        createdAt: "DESC",
+      },
+    });
   }
 }

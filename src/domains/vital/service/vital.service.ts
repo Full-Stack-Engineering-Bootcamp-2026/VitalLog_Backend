@@ -1,7 +1,7 @@
 import { Service } from "typedi";
 import { VitalRepository } from "../repository/vital.repository";
 import { FlagService } from "../../flag/service/flag.service";
-import { StreakService } from "../../streak/service/streak.service"
+import { StreakService } from "../../streak/service/streak.service";
 import { UpdateVitalRequestDto } from "../dto/vital.dto";
 import { NotFoundException } from "../../../common/exceptions/not-found.exception";
 import {
@@ -68,7 +68,7 @@ export class VitalService {
       user,
     });
 
-    await this.streakService.updateStreak(user.id)
+    await this.streakService.updateStreak(user.id);
 
     // 5. If WARNING or CRITICAL → create system flag
     if (status !== RANGE_STATUS.NORMAL) {
@@ -272,6 +272,33 @@ export class VitalService {
       loggedDate: vital.loggedDate,
       createdAt: vital.createdAt,
       updatedAt: vital.updatedAt,
+    };
+  }
+
+  //for staff
+  public async getVitalsByUserId(userId: number, page: number, limit: number) {
+    const [vitals, total] = await this.vitalRepository.findAllByUser(userId, {
+      page,
+      limit,
+    });
+
+    return {
+      data: vitals.map((vital) => ({
+        id: vital.id,
+        vitalType: vital.vitalType,
+        value: vital.value || null,
+        systolicValue: vital.systolicValue || null,
+        diastolicValue: vital.diastolicValue || null,
+        unit: vital.unit || null,
+        status: vital.status,
+        loggedDate: vital.loggedDate,
+        createdAt: vital.createdAt,
+      })),
+
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     };
   }
 }

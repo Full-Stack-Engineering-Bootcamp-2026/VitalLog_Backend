@@ -44,6 +44,7 @@ export class FlagController {
       page: Number(req.query.page),
       limit: Number(req.query.limit),
       status: req.query.status as GetFlagsRequestDto["status"],
+      search: req.query.search as string,
     });
 
     return generateResponse(res, {

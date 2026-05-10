@@ -19,3 +19,33 @@ export interface FlagResponseDto {
   createdAt: Date;
   resolvedAt?: Date;
 }
+export interface GetStaffMembersRequestDto {
+  page: number;
+  limit: number;
+  search?: string;
+}
+
+export interface StaffMemberListItemDto {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  createdAt: Date;
+
+  profile?: {
+    age?: number | null;
+    gender?: string | null;
+    height?: number | null;
+    weight?: number | null;
+    profileImageUrl?: string | null;
+  } | null;
+}
+
+export interface GetStaffMembersResponseDto {
+  members: StaffMemberListItemDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

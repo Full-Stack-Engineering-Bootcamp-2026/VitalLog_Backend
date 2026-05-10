@@ -38,10 +38,5 @@ export class ProfileRoutes {
       upload.single("image"),
       asyncHandler(this.controller.uploadProfileImage.bind(this.controller)),
     );
-<<<<<<< HEAD
-  } //upload.single because only one progile image otherwise upload.array()
-}
-=======
   }
 }
->>>>>>> origin/feature/profile

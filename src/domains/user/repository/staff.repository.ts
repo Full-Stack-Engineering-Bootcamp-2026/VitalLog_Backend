@@ -29,4 +29,16 @@ export class StaffRepository {
     qb.skip(offset).take(filters.limit);
     return await qb.getManyAndCount();
   }
+
+  public async findMemberById(memberId: number): Promise<User | null> {
+    return await this.repo.findOne({
+      where: {
+        id: memberId,
+        role: ROLES.MEMBER,
+        isActive: true,
+      },
+
+      relations: ["profile"],
+    });
+  }
 }

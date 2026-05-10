@@ -27,4 +27,21 @@ export class StaffController {
       data,
     });
   }
+  //get meber dash
+  public async getMemberDashboard(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    const data = await this.service.getMemberDashboard(
+      Number(req.params.id),
+      Number(req.query.page),
+      Number(req.query.limit),
+    );
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "Member dashboard fetched successfully",
+      data,
+    });
+  }
 }

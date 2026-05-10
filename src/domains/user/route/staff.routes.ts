@@ -31,5 +31,12 @@ export class StaffRoutes {
       validate(getStaffMembersSchema),
       asyncHandler(this.controller.getActiveMembers.bind(this.controller)),
     );
+
+    this.router.get(
+      "/members/:id/dashboard",
+      authenticate,
+      requireAnyRole(ROLES.STAFF, ROLES.ADMIN),
+      asyncHandler(this.controller.getMemberDashboard.bind(this.controller)),
+    );
   }
 }

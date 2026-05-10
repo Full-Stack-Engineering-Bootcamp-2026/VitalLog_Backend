@@ -21,6 +21,7 @@ import { FitnessRoutes } from "./domains/fitness/route/fitness.route";
 import { StreakRoutes } from "./domains/streak/route/streak.routes";
 import { FlagRoutes } from "./domains/flag/route/flag.routes";
 import { ProfileRoutes } from "./domains/profile/route/profile.routes";
+import { StorageService } from "./common/services/storage.service";
 class Application {
   public app: Express;
   private port: number;
@@ -94,20 +95,22 @@ class Application {
   }
 
   public async start(): Promise<void> {
-    try {
-      await AppDataSource.initialize();
+  try {
+    await AppDataSource.initialize();
+    console.log("Database connected");
 
-      console.log("Database connected");
+    const storageService = Container.get(StorageService);
+    await storageService.checkConnection();
+    console.log("Storage connected");
 
-      this.app.listen(this.port, () => {
-        console.log(`Server running on port ${this.port}`);
-      });
-    } catch (error) {
-      console.error("DB connection error", error);
-
-      process.exit(1);
-    }
+    this.app.listen(this.port, () => {
+      console.log(`Server running on port ${this.port}`);
+    });
+  } catch (error) {
+    console.error("Startup error", error);
+    process.exit(1);
   }
+}
 }
 
 const application = new Application();

@@ -1,3 +1,4 @@
+import { requireAnyRole } from "./../../../common/middleware/authorize.middleware";
 import { Router } from "express";
 import { Service } from "typedi";
 import { AdminController } from "../controller/admin.controller";
@@ -29,6 +30,13 @@ export class AdminRoutes {
       requireRole(ROLES.ADMIN),
       validate(createStaffSchema),
       asyncHandler(this.controller.createStaff.bind(this.controller)),
+    );
+
+    this.router.get(
+      "/registrations",
+      authenticate,
+      requireAnyRole(ROLES.ADMIN, ROLES.STAFF),
+      asyncHandler(this.controller.getRegistrationTrend.bind(this.controller)),
     );
   }
 }

@@ -32,6 +32,7 @@ export class FlagRepository {
     page: number;
     limit: number;
     status?: FlagStatusType;
+    search?: string;
   }): Promise<[Flag[], number]> {
     const qb = this.repo
       .createQueryBuilder("flag") //SELECT * FROM flags flag
@@ -45,6 +46,14 @@ export class FlagRepository {
       qb.andWhere("flag.status = :status", {
         status: filters.status,
       });
+    }
+    if (filters.search) {
+      qb.andWhere(
+        "(user.name LIKE :search OR user.email LIKE :search OR flag.reason LIKE :search)",
+        {
+          search: `%${filters.search}%`,
+        },
+      );
     }
 
     const offset = (filters.page - 1) * filters.limit;

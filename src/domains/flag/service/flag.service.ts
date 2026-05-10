@@ -165,6 +165,7 @@ export class FlagService {
       page,
       limit,
       status,
+      search: query.search,
     });
 
     return {

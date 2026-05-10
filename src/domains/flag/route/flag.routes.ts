@@ -8,6 +8,8 @@ import { ROLES } from "../../../common/constants/roles.constants";
 import { requireRole } from "../../../common/middleware/authorize.middleware";
 import { createManualFlagSchema } from "../validator/flag.validator";
 import { resolveFlagSchema } from "../validator/flag.validator";
+import { requireAnyRole } from "../../../common/middleware/authorize.middleware";
+import { getFlagsSchema } from "../validator/flag.validator";
 @Service()
 export class FlagRoutes {
   public router: Router;
@@ -36,6 +38,13 @@ export class FlagRoutes {
       requireRole(ROLES.STAFF),
       validate(resolveFlagSchema),
       asyncHandler(this.controller.resolveFlag.bind(this.controller)),
+    );
+    this.router.get(
+      "/",
+      authenticate,
+      requireAnyRole(ROLES.ADMIN, ROLES.STAFF),
+      validate(getFlagsSchema),
+      asyncHandler(this.controller.getFlags.bind(this.controller)),
     );
   }
 }

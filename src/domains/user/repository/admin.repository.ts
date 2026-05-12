@@ -40,4 +40,14 @@ export class AdminDashboardRepository {
       .limit(5) //we want top 5
       .getRawMany();
   }
+
+  public async getAllStaff(): Promise<User[]> {
+    return await this.repo.find({
+      where: {
+        role: ROLES.STAFF,
+        isActive: true, // only active staff (kinda filter )
+      },
+      order: { createdAt: "DESC" },
+    });
+  }
 }

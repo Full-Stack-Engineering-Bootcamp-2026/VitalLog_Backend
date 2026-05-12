@@ -93,4 +93,18 @@ export class AdminService {
       })),
     };
   }
+
+  public async getAllStaff(): Promise<StaffResponseDto[]> {
+    const staff = await this.adminRepository.getAllStaff();
+
+    return staff.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      mustChangePassword: user.mustChangePassword,
+      createdAt: user.createdAt,
+    }));
+  }
 }

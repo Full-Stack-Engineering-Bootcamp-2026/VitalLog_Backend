@@ -47,5 +47,12 @@ export class AdminRoutes {
         this.controller.getFlaggedVitalsDistribution.bind(this.controller),
       ),
     );
+
+    this.router.get(
+      "/staff",
+      authenticate,
+      requireRole(ROLES.ADMIN),
+      asyncHandler(this.controller.getAllStaff.bind(this.controller)),
+    );
   }
 }

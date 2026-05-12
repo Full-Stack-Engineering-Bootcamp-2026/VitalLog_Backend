@@ -49,4 +49,14 @@ export class AdminController {
       data,
     });
   }
+
+  public async getAllStaff(req: Request, res: Response): Promise<Response> {
+    const data = await this.service.getAllStaff();
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "Staff fetched successfully",
+      data,
+    });
+  }
 }

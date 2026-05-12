@@ -14,12 +14,16 @@ import { StaffResponseDto } from "../dto/admin.dto";
 import { EmailService } from "../../../common/services/email.service";
 import { ProfileRepository } from "../../profile/repository/profile.repository";
 import crypto from "crypto";
+import { AdminDashboardRepository } from "../repository/admin.repository";
+import { RegistrationTrendResponseDto } from "../dto/admin.dto";
+import { FlaggedVitalsDistributionResponseDto } from "../dto/admin.dto";
 @Service()
 export class AdminService {
   constructor(
     private readonly repository: UserRepository,
     private readonly emailService: EmailService,
     private readonly profileRepository: ProfileRepository,
+    private readonly adminRepository: AdminDashboardRepository,
   ) {}
   public async createStaff(
     data: CreateStaffRequestDto,
@@ -64,6 +68,29 @@ export class AdminService {
       isActive: user.isActive,
       mustChangePassword: user.mustChangePassword,
       createdAt: user.createdAt,
+    };
+  }
+  //analysis
+
+  public async getRegistrationTrend(): Promise<RegistrationTrendResponseDto> {
+    const rows = await this.adminRepository.getMemberRegistrationsLast30Days();
+
+    return {
+      days: rows.map((row) => ({
+        date: row.date,
+        count: Number(row.count),
+      })),
+    };
+  }
+
+  public async getFlaggedVitalsDistribution(): Promise<FlaggedVitalsDistributionResponseDto> {
+    const rows = await this.adminRepository.getFlaggedVitalsDistribution();
+
+    return {
+      items: rows.map((row) => ({
+        vitalType: row.vitalType,
+        count: Number(row.count),
+      })),
     };
   }
 }

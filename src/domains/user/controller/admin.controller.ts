@@ -24,4 +24,29 @@ export class AdminController {
       data,
     });
   }
+  public async getRegistrationTrend(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    const data = await this.service.getRegistrationTrend();
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "Registration trend fetched successfully",
+      data,
+    });
+  }
+
+  public async getFlaggedVitalsDistribution(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    const data = await this.service.getFlaggedVitalsDistribution();
+
+    return generateResponse(res, {
+      statusCode: HttpStatus.OK,
+      message: "Flagged vitals distribution fetched successfully",
+      data,
+    });
+  }
 }

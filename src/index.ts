@@ -107,8 +107,8 @@ class Application {
       console.log("Database connected");
 
       const storageService = Container.get(StorageService);
-      await storageService.checkConnection();
-      console.log("Storage connected");
+      //  await storageService.checkConnection();
+      // console.log("Storage connected");
 
       this.app.listen(this.port, () => {
         console.log(`Server running on port ${this.port}`);
